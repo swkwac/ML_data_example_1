@@ -48,3 +48,35 @@ coefficients = model.coef_
 feature_names = poly.get_feature_names_out(['time', 'fluence'])
 
 coef_dict = {name: coef for name, coef in zip(feature_names, coefficients)}
+
+#visualize fitted algorythm on a plot with experimental data present
+
+t_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 100)
+F_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 100)
+t_grid, F_grid = np.meshgrid(t_range, F_range)
+X_grid = np.hstack((t_grid.reshape(-1, 1), F_grid.reshape(-1, 1)))
+X_poly_grid = poly.transform(X_grid)
+
+
+
+I_pred = model.predict(X_poly_grid)
+I_pred = np.clip(I_pred, a_min=None, a_max=120)
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+
+ax.scatter(df['t'], df['F'], df['I'], color='red', label='Exp. data')
+
+
+ax.plot_surface(t_grid, F_grid, I_pred.reshape(t_grid.shape), alpha=0.5, cmap='viridis', edgecolor='none')
+
+
+
+ax.set_xlabel('Impulse time [ms]')
+ax.set_ylabel('Fluence [J/CM2]')
+ax.set_zlabel('Current [A]')
+ax.set_title('')
+ax.legend()
+
+plt.show()
